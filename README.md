@@ -1,0 +1,3 @@
+topicn.r,topic_soil.r分别为皮肤微生物组和土壤微生物组处理所用的R文件
+Chinese,skinspecies_c,tax_c 为皮肤微生物组数据
+all_genus，metadata为土壤微生物组数据
