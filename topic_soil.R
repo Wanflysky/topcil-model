@@ -15,7 +15,14 @@ library(dplyr)
 library(tibble)
 library(MicrobiomeStat)
 library(RColorBrewer)
- metadata= as.data.frame(all_genus1)
+all_genus <- read.delim("D:/桌面/code/R code/all_genus.txt", check.names = FALSE)
+all_genus1<-all_genus[,-1]
+otu_n = all_genus1
+metadata <- read.delim("D:/桌面/code/R code/metadata.txt")
+metadata <- metadata %>%
+  dplyr::select(SampleID,Compost,Material, Day, Replication, Degradation,Mass,Concentration) %>%
+  na.omit(.)
+
 otu_n<- sweep(otu_n, 2, colSums(otu_n), `/`)
 otu_n <- sweep(otu_n,2,1000000,'*')
 mydata_n<-otu_n[-c(10648:10648),]%>%na.omit(.)
@@ -29,18 +36,18 @@ otu_tab_n <- mydata_n %>%
 
 tax_tab_n <- mydata_n %>%
   rownames_to_column()%>%
-  dplyr::select(rowname) %>%
-  tidyr::separate(rowname, into = c("domain", "Kingdom", "Phylum", "Class", "Order", "Family", "Genus"), sep = "\\|") %>%
-  dplyr::mutate(domain = gsub("d__", "", domain),
+  select(rowname) %>%
+  separate(rowname, into = c("domain", "Kingdom", "Phylum", "Class", "Order", "Family", "Genus"), sep = "\\|") %>%
+  mutate(domain = gsub("d__", "", domain),
                 Kingdom = gsub("k__", "", Kingdom),
                 Phylum = gsub("p__", "", Phylum),
                 Class = gsub("c__", "", Class),
                 Order = gsub("o__", "", Order),
                 Family = gsub("f__", "", Family),
                 Genus = gsub("g__", "", Genus)) %>%
-  dplyr::mutate(spec_row = Genus) %>%
+  mutate(spec_row = Genus) %>%
   distinct(Genus,.keep_all = T) %>%
-  tibble::column_to_rownames(var = "spec_row")
+  column_to_rownames(var = "spec_row")
 
 
 (ps_n <- phyloseq(sample_data(metadata),
@@ -427,15 +434,7 @@ cel_ng$mean =  (cel_ng$Degradation+cel_ng$Degradation.x+cel_ng$Degradation.y)/3
 cel_ng = cel_ng[order(cel_ng$Day),]
 cel_ngf = cel_ng[,c("Day","mean")]
 cel_ngf = cel_ngf[order(cel_ngf$Day),]
-x4 = cel_ng$Day
-y4 = cel_ng$mean
-plot(x,y, xlab ="Day",ylab = "Degradation")
-fit <- lm(y ~ x)
-abline(fit, col = "red")
 
-points(x2, y2, col = "red", pch = 16)
-points(x3, y3, col = "green", pch = 16)
-points(x4, y4, col = "blue", pch = 16)
 ngf = merge(blank_ngf,PET_ngf,all = TRUE,by = "Day")
 ngf = merge(ngf,PBAT_ngf,all = TRUE,by = "Day")
 ngf = merge(ngf,cel_ngf,all = TRUE,by = "Day")
